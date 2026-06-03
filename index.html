@@ -138,6 +138,57 @@ canvas {
   transition: background 0.2s;
 }
 #setQuitBtn:hover { background: rgba(200,30,30,0.35); color: #ff4444; }
+#tutorialOverlay {
+  display: none; position: absolute; inset: 0; z-index: 25;
+  background: rgba(0,0,0,0.75);
+  align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+#tutorialOverlay.show { display: flex; opacity: 1; }
+#tutorialBox {
+  background: rgba(20,18,26,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px; padding: 28px;
+  width: 280px; backdrop-filter: blur(10px);
+  text-align: center;
+}
+#tutorialBox h2 { color: #fff; font-size: 18px; margin-bottom: 16px; }
+#tutorialBox p { color: rgba(255,255,255,0.78); font-size: 14px; line-height: 1.7; margin: 6px 0; text-align: left; }
+#tutorialBox .hl { color: #ff5555; font-weight: bold; }
+#tutorialBox .ok { color: #55dd77; font-weight: bold; }
+#tutorialBtn {
+  margin-top: 18px; padding: 11px 0; width: 100%;
+  background: linear-gradient(180deg,#ee4455,#bb2233);
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 16px; font-weight: bold;
+  cursor: pointer; letter-spacing: 2px;
+  box-shadow: 0 0 18px rgba(255,50,50,0.35);
+  transition: transform 0.15s;
+}
+#tutorialBtn:hover { transform: scale(1.04); }
+#victoryOverlay {
+  display: none; position: absolute; inset: 0; z-index: 25;
+  background: rgba(0,0,0,0.65);
+  align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+#victoryOverlay.show { display: flex; opacity: 1; }
+#victoryBox {
+  background: rgba(20,18,26,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 30px 28px 22px;
+  width: 280px; backdrop-filter: blur(10px);
+  text-align: center;
+}
+#victoryBox h2 { color: #ffdd44; font-size: 22px; margin-bottom: 6px; }
+#victoryBox .sub { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 14px; }
+#victoryBox .stars { color: #ffdd44; font-size: 15px; margin-bottom: 20px; }
+#victoryBtnRow { display: flex; gap: 10px; }
+#victoryBtnRow > div { flex: 1; padding: 11px 0; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px; transition: transform 0.15s, box-shadow 0.15s; }
+#vicRetryBtn { background: linear-gradient(180deg,#ee4455,#bb2233); color: #fff; box-shadow: 0 0 14px rgba(255,50,50,0.3); }
+#vicMenuBtn { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1); }
+#vicRetryBtn:hover { transform: scale(1.04); box-shadow: 0 0 22px rgba(255,50,50,0.5); }
+#vicMenuBtn:hover { transform: scale(1.04); background: rgba(255,255,255,0.14); color: #fff; }
 </style>
 </head>
 <body>
@@ -152,7 +203,29 @@ canvas {
       <div class="setRow"><label>静音</label><button id="setMuteBtn">🔊</button></div>
       <div class="setRow"><label>音量</label><input type="range" id="setVolume" min="0" max="100" value="100"></div>
       <div class="setRow"><label>震动</label><button id="setVibrateBtn">📳</button></div>
+      <div class="setRow"><label>色盲模式</label><button id="setColorblindBtn">🎨</button></div>
       <div id="setQuitBtn">退 出 游 戏</div>
+    </div>
+  </div>
+  <div id="tutorialOverlay">
+    <div id="tutorialBox">
+      <h2>🔍 拆弹规则</h2>
+      <p>每条电线连接左右两个指示灯</p>
+      <p><span class="hl">⚫⚫ 两端都是红灯（双红线）</span><br>→ 必须剪断</p>
+      <p><span class="ok">⚫○ 有一边是绿灯</span><br>→ 不要剪，剪错会爆炸</p>
+      <p>在时间内剪完所有双红线 → 过关</p>
+      <div id="tutorialBtn">开始拆弹！</div>
+    </div>
+  </div>
+  <div id="victoryOverlay">
+    <div id="victoryBox">
+      <h2>🏆 恭喜通关！</h2>
+      <div class="sub">已完成全部 20 大关</div>
+      <div class="stars">⭐ 总星数: <span id="vicStars">0</span> / 60</div>
+      <div id="victoryBtnRow">
+        <div id="vicRetryBtn">🔄 再来一次</div>
+        <div id="vicMenuBtn">🏠 返回菜单</div>
+      </div>
     </div>
   </div>
 </div>
@@ -166,7 +239,14 @@ const settingsPanel = document.getElementById('settingsPanel');
 const setMuteBtn = document.getElementById('setMuteBtn');
 const setVolume = document.getElementById('setVolume');
 const setVibrateBtn = document.getElementById('setVibrateBtn');
+const setColorblindBtn = document.getElementById('setColorblindBtn');
 const setQuitBtn = document.getElementById('setQuitBtn');
+const tutorialOverlay = document.getElementById('tutorialOverlay');
+const tutorialBtn = document.getElementById('tutorialBtn');
+const victoryOverlay = document.getElementById('victoryOverlay');
+const vicStars = document.getElementById('vicStars');
+const vicRetryBtn = document.getElementById('vicRetryBtn');
+const vicMenuBtn = document.getElementById('vicMenuBtn');
 const container = document.getElementById('gameContainer');
 
 const W = 520, H = 720;
@@ -213,7 +293,7 @@ let rageMode = false, rageScore = 0;
 let menuWires = [], menuPCB = null;
 let stagePCB = null;
 let expData = null;
-let soundOn = true, vibrateOn = true, sfxVol = 1, audioCtx = null, bgmTmr = null, bgmTick = 0;
+let soundOn = true, vibrateOn = true, colorblind = false, sfxVol = 1, audioCtx = null, bgmTmr = null, bgmTick = 0;
 
 function ac() { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if (audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
 function sfx(fn) { if (!soundOn) return; try { const c=ac(); fn(c); } catch(e){} }
@@ -438,6 +518,8 @@ function startTimer() {
 function upHUD() {
   if (rageMode) {
     hudPg.innerHTML = `⚡ 无限模式 &nbsp;|&nbsp; 得分: <b>${rageScore}</b>`;
+  } else if (colorblind) {
+    hudPg.innerHTML = `第 ${mlv+1}/${TOTAL_LV} 大关 — 第 ${stg+1}/${TOTAL_ST} 小关 &nbsp;✂ ${cutSet.size}/${rrIdx.length} 条 (●⚪)`;
   } else {
     hudPg.innerHTML = `第 ${mlv+1}/${TOTAL_LV} 大关 — 第 ${stg+1}/${TOTAL_ST} 小关 &nbsp;✂ ${cutSet.size}/${rrIdx.length} 条双红线`;
   }
@@ -454,7 +536,7 @@ function loadBg(lv) {
 
 function startGame(rage) {
   rageMode = !!rage; rageScore = 0;
-  if (!localStorage.getItem('bombTutorialShown')) { mode = 'tutorial'; return; }
+  if (!localStorage.getItem('bombTutorialShown')) { tutorialOverlay.style.display = 'flex'; requestAnimationFrame(() => tutorialOverlay.classList.add('show')); return; }
   beginPlay();
 }
 function beginPlay() {
@@ -489,6 +571,8 @@ function quitGame() {
   hudTm.style.display = 'none';
   settingsBtn.style.display = 'none';
   closeSettings();
+  victoryOverlay.classList.remove('show');
+  victoryOverlay.style.display = 'none';
   canvas.style.cursor = 'default';
   stars = 0; pts = []; shkX = 0; shkY = 0;
   rageMode = false; rageScore = 0;
@@ -575,6 +659,9 @@ function vic() {
       cl: pk(['#ff4455','#44dd66','#44aaff','#ffdd44','#ff66aa']), lf: 1, dc: rd(.005,.015), tp: 'c',
     });
   }, 100);
+  vicStars.textContent = stars;
+  victoryOverlay.style.display = 'flex';
+  requestAnimationFrame(() => victoryOverlay.classList.add('show'));
 }
 
 function cutWire(idx, cx, cy) {
@@ -723,6 +810,21 @@ function drawLamp(x, y, isRed, cut) {
     ctx.fillStyle = isRed ? `rgba(255,60,60,${b})` : `rgba(60,220,70,${b})`;
     ctx.beginPath(); ctx.arc(x, y, 6.5, 0, 6.28); ctx.fill();
   }
+  if (colorblind) {
+    const sx = x, sy = y + 16;
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    if (cut) {
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.beginPath(); ctx.arc(sx, sy, 5, 0, 6.28); ctx.fill();
+    } else if (isRed) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(sx, sy, 5, 0, 6.28); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.arc(sx, sy, 5, 0, 6.28); ctx.stroke();
+    }
+  }
   ctx.restore();
 }
 
@@ -738,7 +840,7 @@ function drawBG() {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
   }
-  if (mode !== 'exploded' && mode !== 'exploded_show' && mode !== 'menu' && mode !== 'tutorial') {
+  if (mode !== 'exploded' && mode !== 'exploded_show' && mode !== 'menu') {
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.fillRect(0, 0, W, H);
   }
@@ -1381,32 +1483,6 @@ function drawMenu() {
   if (showLvSelect) dMenuLvPanel(t, lvHov);
 }
 
-function drawTut() {
-  ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, 0, W, H);
-  const cx = W / 2;
-  ctx.save(); ctx.shadowColor = '#ff3344'; ctx.shadowBlur = 40;
-  ctx.fillStyle = '#ff4455';
-  ctx.font = 'bold 30px Arial,sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('🔴🔴 双红链接 → 必须剪断', cx, H / 2 - 70);
-  ctx.restore();
-  ctx.save(); ctx.shadowColor = '#33cc55'; ctx.shadowBlur = 40;
-  ctx.fillStyle = '#44dd66';
-  ctx.font = 'bold 30px Arial,sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('🔴🟢 🟢🔴 🟢🟢 → 不要剪', cx, H / 2 - 15);
-  ctx.restore();
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.font = '18px Arial,sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('剪对全部双红链接即可过关', cx, H / 2 + 45);
-  if ((Date.now() / 600 | 0) % 2 === 0) {
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '16px Arial,sans-serif';
-    ctx.fillText('点击任意处开始', cx, H / 2 + 110);
-  }
-}
-
 function drawSS() {
   if (mode !== 'stageSuccess') return;
   ctx.fillStyle = 'rgba(0,180,50,0.06)'; ctx.fillRect(0, 0, W, H);
@@ -1579,7 +1655,6 @@ function draw() {
     const sh = mode === 'playing' || mode === 'stageSuccess' || mode === 'levelTransition' || mode === 'victory';
     if (sh) drawWires();
     drawPts();
-    if (mode === 'tutorial') drawTut();
     if (mode === 'exploded' || mode === 'exploded_show') drawExpl();
     if (mode === 'stageSuccess') drawSS();
     if (mode === 'levelTransition') drawLT();
@@ -1701,16 +1776,8 @@ function hClick(x, y) {
     if (ir(x, y, LB)) { sfxClick(); showLvSelect = true; return; }
     return;
   }
-  if (mode === 'tutorial') { localStorage.setItem('bombTutorialShown', '1'); beginPlay(); return; }
   if (mode === 'exploded_show') {
     if (rageMode) { startGame(true); } else { startStg(); }
-    return;
-  }
-  if (mode === 'victory') {
-    closeSettings();
-    mode = 'menu'; hudPg.style.display = 'none'; hudTm.style.display = 'none'; stopBGM();
-    canvas.style.cursor = 'default'; stars = 0; settingsBtn.style.display = 'none';
-    if (vicTmr) { clearInterval(vicTmr); vicTmr = null; }
     return;
   }
   if (mode !== 'playing') return;
@@ -1741,7 +1808,7 @@ function hMove(x, y) {
     }
     canvas.style.cursor = (btnHov || lvBtnHov || lvHov >= 0) ? 'pointer' : 'default';
   }
-  else if (mode === 'exploded_show' || mode === 'victory') canvas.style.cursor = 'pointer';
+  else if (mode === 'exploded_show') canvas.style.cursor = 'pointer';
   else canvas.style.cursor = 'default';
 }
 
@@ -1756,6 +1823,27 @@ settingsBtn.addEventListener('click', openSettings);
 settingsPanel.addEventListener('click', e => { if (e.target === settingsPanel) closeSettings(); });
 
 setQuitBtn.addEventListener('click', () => { closeSettings(); quitGame(); });
+tutorialBtn.addEventListener('click', () => {
+  tutorialOverlay.classList.remove('show');
+  tutorialOverlay.style.display = 'none';
+  localStorage.setItem('bombTutorialShown', '1');
+  beginPlay();
+});
+function vicCleanup() {
+  victoryOverlay.classList.remove('show');
+  victoryOverlay.style.display = 'none';
+  closeSettings();
+  mode = 'menu';
+  hudPg.style.display = 'none';
+  hudTm.style.display = 'none';
+  stopBGM();
+  canvas.style.cursor = 'default';
+  settingsBtn.style.display = 'none';
+  if (vicTmr) { clearInterval(vicTmr); vicTmr = null; }
+  stars = 0;
+}
+vicRetryBtn.addEventListener('click', () => { vicCleanup(); startGame(); });
+vicMenuBtn.addEventListener('click', () => { vicCleanup(); });
 
 function toggleMute() {
   soundOn = !soundOn;
@@ -1779,8 +1867,17 @@ function toggleVibrate() {
 }
 setVibrateBtn.addEventListener('click', toggleVibrate);
 
+function toggleColorblind() {
+  colorblind = !colorblind;
+  setColorblindBtn.textContent = colorblind ? '♿' : '🎨';
+  setColorblindBtn.classList.toggle('off', !colorblind);
+  localStorage.setItem('bombColorblind', colorblind ? '1' : '0');
+}
+setColorblindBtn.addEventListener('click', toggleColorblind);
+
 if (localStorage.getItem('bombSound') === '0') { soundOn = false; setMuteBtn.textContent = '🔇'; setMuteBtn.classList.add('off'); }
 if (localStorage.getItem('bombVibrate') === '0') { vibrateOn = false; setVibrateBtn.classList.add('off'); }
+if (localStorage.getItem('bombColorblind') === '1') { colorblind = true; setColorblindBtn.textContent = '♿'; }
 const savedVol = parseFloat(localStorage.getItem('bombVol'));
 if (savedVol >= 0) { sfxVol = savedVol; setVolume.value = savedVol * 100; }
 
