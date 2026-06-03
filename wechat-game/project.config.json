@@ -1,0 +1,17 @@
+{
+  "description": "拆弹大师 - 微信小游戏",
+  "packOptions": { "ignore": [] },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true
+  },
+  "compileType": "game",
+  "libVersion": "3.3.0",
+  "projectname": "bomb-defuse",
+  "scripts": {},
+  "condition": {}
+}

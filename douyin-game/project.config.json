@@ -1,0 +1,10 @@
+{
+  "description": "拆弹大师 - 抖音小游戏",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "minified": true
+  },
+  "compileType": "game",
+  "projectname": "bomb-defuse"
+}
