@@ -179,6 +179,21 @@ const LV_CFG = [
   [{w:6,r:2,t:50},{w:7,r:2,t:42},{w:8,r:3,t:35},{w:9,r:3,t:25},{w:9,r:4,t:18}],
   [{w:7,r:2,t:45},{w:8,r:3,t:35},{w:9,r:4,t:28},{w:10,r:4,t:20},{w:10,r:5,t:14}],
   [{w:8,r:3,t:40},{w:9,r:3,t:30},{w:10,r:4,t:22},{w:11,r:5,t:16},{w:11,r:6,t:12}],
+  [{w:8,r:3,t:38},{w:9,r:4,t:28},{w:10,r:4,t:20},{w:11,r:5,t:15},{w:12,r:6,t:12}],
+  [{w:9,r:3,t:35},{w:10,r:4,t:26},{w:11,r:5,t:18},{w:12,r:6,t:14},{w:12,r:6,t:11}],
+  [{w:9,r:4,t:33},{w:10,r:4,t:24},{w:11,r:5,t:17},{w:12,r:6,t:13},{w:13,r:7,t:11}],
+  [{w:10,r:4,t:30},{w:11,r:5,t:22},{w:12,r:6,t:16},{w:13,r:6,t:12},{w:13,r:7,t:10}],
+  [{w:10,r:4,t:28},{w:11,r:5,t:20},{w:12,r:6,t:15},{w:13,r:7,t:12},{w:14,r:8,t:10}],
+  [{w:11,r:5,t:26},{w:12,r:6,t:18},{w:13,r:7,t:14},{w:14,r:7,t:11},{w:14,r:8,t:9}],
+  [{w:11,r:5,t:24},{w:12,r:6,t:17},{w:13,r:7,t:13},{w:14,r:8,t:11},{w:15,r:9,t:9}],
+  [{w:12,r:5,t:22},{w:13,r:6,t:16},{w:14,r:7,t:12},{w:15,r:8,t:10},{w:15,r:9,t:9}],
+  [{w:12,r:6,t:20},{w:13,r:7,t:15},{w:14,r:8,t:12},{w:15,r:9,t:10},{w:16,r:10,t:8}],
+  [{w:13,r:6,t:18},{w:14,r:7,t:14},{w:15,r:8,t:11},{w:16,r:9,t:9},{w:16,r:10,t:8}],
+  [{w:13,r:6,t:17},{w:14,r:7,t:13},{w:15,r:8,t:10},{w:16,r:9,t:9},{w:17,r:10,t:8}],
+  [{w:14,r:7,t:16},{w:15,r:8,t:12},{w:16,r:9,t:10},{w:17,r:10,t:8},{w:17,r:11,t:8}],
+  [{w:14,r:7,t:15},{w:15,r:8,t:12},{w:16,r:9,t:9},{w:17,r:10,t:8},{w:18,r:11,t:8}],
+  [{w:15,r:7,t:14},{w:16,r:8,t:11},{w:17,r:9,t:9},{w:18,r:10,t:8},{w:18,r:11,t:7}],
+  [{w:15,r:8,t:13},{w:16,r:9,t:10},{w:17,r:10,t:8},{w:18,r:11,t:7},{w:19,r:12,t:7}],
 ];
 
 const TOTAL_LV = LV_CFG.length;
@@ -217,12 +232,13 @@ function startBGM() { stopBGM(); if (!soundOn) return; bgmTick=0; bgmTmr=setInte
 function stopBGM() { if (bgmTmr) { clearInterval(bgmTmr); bgmTmr=null; } }
 
 const BG_IMAGES = [
-  'defuse_panel_00001_.png',
-  'wire_panel_00002_.png',
-  'final_panel_00001_.png',
-  'final_panel_00002_.png',
-  'final_panel_00003_.png',
-  'sd_panel_00001_.png',
+  'bomb_single_00001_.png','bomb_single_00002_.png','bomb_single_00005_.png',
+  'bomb_single_00007_.png','bomb_single_00009_.png','bomb_single_00010_.png',
+  'bomb_single_00011_.png','bomb_single_00012_.png','bomb_single_00013_.png',
+  'bomb_single_00014_.png','bomb_single_00015_.png','bomb_single_00016_.png',
+  'bomb_single_00017_.png','bomb_single_00018_.png','bomb_single_00019_.png',
+  'bomb_single_00020_.png','bomb_single_00021_.png','bomb_single_00022_.png',
+  'bomb_single_00023_.png',
 ];
 
 // Stage intro
@@ -423,7 +439,7 @@ function upHUD() {
   if (rageMode) {
     hudPg.innerHTML = `⚡ 无限模式 &nbsp;|&nbsp; 得分: <b>${rageScore}</b>`;
   } else {
-    hudPg.textContent = `✂ 已剪断: ${cutSet.size}/${rrIdx.length} 条双红线`;
+    hudPg.innerHTML = `第 ${mlv+1}/${TOTAL_LV} 大关 — 第 ${stg+1}/${TOTAL_ST} 小关 &nbsp;✂ ${cutSet.size}/${rrIdx.length} 条双红线`;
   }
 }
 
@@ -451,7 +467,7 @@ function beginPlay() {
   hudPg.style.display = 'block';
   hudTm.style.display = 'block';
   settingsBtn.style.display = 'flex';
-  loadBg(0); genStg(); upHUD(); showStageIntro(() => { mode = 'playing'; startTimer(); startBGM(); });
+  loadBg(mlv); genStg(); upHUD(); showStageIntro(() => { mode = 'playing'; startTimer(); startBGM(); });
 }
 function startStg() {
   pts = []; shkX = 0; shkY = 0; expData = null;
@@ -1023,7 +1039,7 @@ function dMenuBtn(t) {
   if (!isNaN(prog) && prog >= 0) {
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.font = '12px Arial,sans-serif';
-    ctx.fillText(`第 ${prog + 1} 关`, W / 2, by + bh + 18);
+    ctx.fillText(`第 ${prog + 1} 大关`, W / 2, by + bh + 18);
   }
 }
 
@@ -1062,47 +1078,50 @@ function dMenuLvPanel(t, hov) {
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.fillRect(0, 0, W, H);
 
-  const cols = 2, gap = 20, cw = 170, ch = 95;
+  const cols = 3, gap = 8, cw = 108, ch = 56;
+  const rows = Math.ceil(TOTAL_LV / cols);
   const totalW = cols * cw + (cols - 1) * gap;
-  const ox = W / 2 - totalW / 2, oy = 200;
-  const infB = { x: ox + 10, y: oy + 64 + ch * 2 + gap + 16, w: totalW - 20, h: 42 };
-  const panelH = ch * 2 + gap + 90 + 16 + infB.h + 20;
+  const ox = Math.max(10, (W - totalW) / 2);
+  const headerH = 52;
+  const gridH = rows * ch + (rows - 1) * gap;
+  const infH = 34;
+  const pad = 12;
+  const panelH = headerH + 4 + gridH + 8 + infH + pad;
 
-  ctx.fillStyle = 'rgba(10,10,20,0.85)';
-  const pr = 16;
+  const oy = Math.max(16, (H - panelH) / 2);
+
+  ctx.fillStyle = 'rgba(10,10,20,0.92)';
+  const pr = 12;
+  const px = ox - pad, py = oy, pw = totalW + pad * 2;
   ctx.beginPath();
-  ctx.moveTo(ox - 20 + pr, oy);
-  ctx.lineTo(ox - 20 + totalW + 40 - pr, oy);
-  ctx.quadraticCurveTo(ox - 20 + totalW + 40, oy, ox - 20 + totalW + 40, oy + pr);
-  ctx.lineTo(ox - 20 + totalW + 40, oy + panelH - pr);
-  ctx.quadraticCurveTo(ox - 20 + totalW + 40, oy + panelH, ox - 20 + totalW + 40 - pr, oy + panelH);
-  ctx.lineTo(ox - 20 + pr, oy + panelH);
-  ctx.quadraticCurveTo(ox - 20, oy + panelH, ox - 20, oy + panelH - pr);
-  ctx.lineTo(ox - 20, oy + pr);
+  ctx.moveTo(px + pr, py); ctx.lineTo(px + pw - pr, py);
+  ctx.quadraticCurveTo(px + pw, py, px + pw, py + pr);
+  ctx.lineTo(px + pw, py + panelH - pr);
+  ctx.quadraticCurveTo(px + pw, py + panelH, px + pw - pr, py + panelH);
+  ctx.lineTo(px + pr, py + panelH);
+  ctx.quadraticCurveTo(px, py + panelH, px, py + panelH - pr);
+  ctx.lineTo(px, py + pr);
+  ctx.quadraticCurveTo(px, py, px + pr, py);
   ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1; ctx.stroke();
 
-  ctx.fillStyle = 'rgba(255,255,255,0.2)';
-  ctx.font = 'bold 18px Arial,sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('关 卡 选 择', W / 2, oy + 28);
-
-  ctx.font = '13px Arial,sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fillText('点击 × 或外部关闭', W / 2, oy + 52);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.font = '22px Arial,sans-serif';
+  ctx.font = 'bold 15px Arial,sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('✕', ox - 20 + totalW + 40 - 22, oy + 22);
+  ctx.fillText('大 关 选 择', W / 2, oy + 18);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.font = '17px Arial,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('✕', px + pw - 18, oy + 16);
 
   const prog = parseInt(localStorage.getItem('bombProgress'));
   const maxLv = isNaN(prog) ? 0 : prog + 1;
 
   for (let i = 0; i < TOTAL_LV; i++) {
     const col = i % cols, row = Math.floor(i / cols);
-    const bx = ox + col * (cw + gap), by = oy + 64 + row * (ch + gap);
+    const bx = ox + col * (cw + gap), by = oy + headerH + row * (ch + gap);
     const locked = i > maxLv;
     const isHov = hov === i;
 
@@ -1112,7 +1131,7 @@ function dMenuLvPanel(t, hov) {
     else if (isHov) { bg.addColorStop(0, '#ff5566'); bg.addColorStop(1, '#cc2233'); }
     else { bg.addColorStop(0, '#d43a4a'); bg.addColorStop(1, '#a01a2a'); }
     ctx.fillStyle = bg;
-    const r2 = 10;
+    const r2 = 7;
     ctx.beginPath();
     ctx.moveTo(bx + r2, by); ctx.lineTo(bx + cw - r2, by);
     ctx.quadraticCurveTo(bx + cw, by, bx + cw, by + r2);
@@ -1132,50 +1151,51 @@ function dMenuLvPanel(t, hov) {
     ctx.textAlign = 'center';
     if (locked) {
       ctx.fillStyle = 'rgba(200,200,200,0.2)';
-      ctx.font = '30px Arial,sans-serif';
+      ctx.font = '20px Arial,sans-serif';
       ctx.textBaseline = 'middle';
       ctx.fillText('🔒', bx + cw / 2, by + ch / 2);
     } else {
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 28px Arial,sans-serif';
+      ctx.font = 'bold 16px Arial,sans-serif';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`第 ${i + 1} 关`, bx + cw / 2, by + 28);
+      ctx.fillText(`第${i + 1}大关`, bx + cw / 2, by + 19);
       ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.font = '13px Arial,sans-serif';
+      ctx.font = '10px Arial,sans-serif';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(`${LV_CFG[i].length} 小局`, bx + cw / 2, by + ch - 16);
+      ctx.fillText(`${TOTAL_ST}小关`, bx + cw / 2, by + ch - 5);
       if (i < maxLv) {
-        ctx.fillStyle = 'rgba(255,220,80,0.5)';
-        ctx.font = '12px Arial,sans-serif';
+        ctx.fillStyle = 'rgba(255,220,80,0.45)';
+        ctx.font = '10px Arial,sans-serif';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('✅ 已通关', bx + cw / 2, by + ch - 4);
+        ctx.fillText('✓', bx + cw - 12, by + 12);
       }
     }
   }
 
   ctx.save();
   const isHov = hov === -2;
-  const bg = ctx.createLinearGradient(infB.x, infB.y, infB.x, infB.y + infB.h);
+  const infBx = ox, infBy = oy + headerH + gridH + 8, infBw = totalW, infBh = infH;
+  const bg = ctx.createLinearGradient(infBx, infBy, infBx, infBy + infBh);
   if (isHov) { bg.addColorStop(0, '#ff7733'); bg.addColorStop(1, '#cc4400'); }
   else { bg.addColorStop(0, '#ee6622'); bg.addColorStop(1, '#bb3300'); }
   ctx.fillStyle = bg;
-  const r2 = 8;
+  const r2 = 6;
   ctx.beginPath();
-  ctx.moveTo(infB.x + r2, infB.y); ctx.lineTo(infB.x + infB.w - r2, infB.y);
-  ctx.quadraticCurveTo(infB.x + infB.w, infB.y, infB.x + infB.w, infB.y + r2);
-  ctx.lineTo(infB.x + infB.w, infB.y + infB.h - r2);
-  ctx.quadraticCurveTo(infB.x + infB.w, infB.y + infB.h, infB.x + infB.w - r2, infB.y + infB.h);
-  ctx.lineTo(infB.x + r2, infB.y + infB.h);
-  ctx.quadraticCurveTo(infB.x, infB.y + infB.h, infB.x, infB.y + infB.h - r2);
-  ctx.lineTo(infB.x, infB.y + r2);
-  ctx.quadraticCurveTo(infB.x, infB.y, infB.x + r2, infB.y);
+  ctx.moveTo(infBx + r2, infBy); ctx.lineTo(infBx + infBw - r2, infBy);
+  ctx.quadraticCurveTo(infBx + infBw, infBy, infBx + infBw, infBy + r2);
+  ctx.lineTo(infBx + infBw, infBy + infBh - r2);
+  ctx.quadraticCurveTo(infBx + infBw, infBy + infBh, infBx + infBw - r2, infBy + infBh);
+  ctx.lineTo(infBx + r2, infBy + infBh);
+  ctx.quadraticCurveTo(infBx, infBy + infBh, infBx, infBy + infBh - r2);
+  ctx.lineTo(infBx, infBy + r2);
+  ctx.quadraticCurveTo(infBx, infBy, infBx + r2, infBy);
   ctx.closePath(); ctx.fill();
   ctx.strokeStyle = `rgba(255,200,150,${isHov ? 0.3 : 0.08})`;
   ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 16px Arial,sans-serif';
+  ctx.font = 'bold 14px Arial,sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('⚡ 无 限 模 式', infB.x + infB.w / 2, infB.y + infB.h / 2);
+  ctx.fillText('⚡ 无 限 模 式', infBx + infBw / 2, infBy + infBh / 2);
   ctx.restore();
   ctx.restore();
 }
@@ -1515,12 +1535,13 @@ function drawLT() {
   ctx.fillText('🎉', W / 2, H / 2 - 55);
   ctx.shadowBlur = 25;
   ctx.fillStyle = '#ffcc44';
-  ctx.font = 'bold 28px Arial,sans-serif';
-  ctx.fillText(`第 ${mlv + 1} 关通关！`, W / 2, H / 2 + 15);
+  ctx.font = 'bold 24px Arial,sans-serif';
+  const endSub = stg >= TOTAL_ST - 1;
+  ctx.fillText(`第 ${mlv+1} 大关 — 第 ${stg+1} 小关通关！`, W / 2, H / 2 + 15);
   ctx.fillStyle = 'rgba(255,255,255,0.6)';
   ctx.font = '17px Arial,sans-serif';
   ctx.fillText(`当前总星数: ${stars} ⭐`, W / 2, H / 2 + 65);
-  ctx.fillText('准备下一关...', W / 2, H / 2 + 100);
+  ctx.fillText(endSub ? `准备第 ${mlv+2} 大关 — 第 1 小关...` : `准备第 ${mlv+1} 大关 — 第 ${stg+2} 小关...`, W / 2, H / 2 + 100);
   ctx.restore();
 }
 
@@ -1570,7 +1591,7 @@ function draw() {
     ctx.fillRect(0,0,W,H);
     ctx.textAlign='center'; ctx.textBaseline='middle';
     let txt = '', sz = 36;
-    if (el < .33) { txt = `第 ${mlv+1}-${stg+1} 关`; sz = 36; }
+    if (el < .33) { txt = `第 ${mlv+1}/${TOTAL_LV} 大关 — 第 ${stg+1}/${TOTAL_ST} 小关`; sz = 32; }
     else if (el < .55) { txt = '预  备'; sz = 42; }
     else if (el < .85) { txt = 'GO!'; sz = 64; }
     if (txt) {
@@ -1647,24 +1668,31 @@ function xy(cx, cy) {
 function hClick(x, y) {
   if (mode === 'menu') {
     if (showLvSelect) {
-      const cols = 2, gap = 20, cw = 170, ch = 95;
+      const cols = 3, gap = 8, cw = 108, ch = 56;
+      const rows = Math.ceil(TOTAL_LV / cols);
       const totalW = cols * cw + (cols - 1) * gap;
-      const ox = W / 2 - totalW / 2, oy = 200;
-      const panelH = ch * 2 + gap + 90 + 16 + 42 + 20;
-      const inPanel = x >= ox - 20 && x <= ox - 20 + totalW + 40 && y >= oy && y <= oy + panelH;
+      const ox = Math.max(10, (W - totalW) / 2);
+      const headerH = 52;
+      const gridH = rows * ch + (rows - 1) * gap;
+      const infH = 34;
+      const pad = 12;
+      const panelH = headerH + 4 + gridH + 8 + infH + pad;
+      const oy = Math.max(16, (H - panelH) / 2);
+      const px = ox - pad, py = oy, pw = totalW + pad * 2;
+      const inPanel = x >= px && x <= px + pw && y >= py && y <= py + panelH;
       if (!inPanel) { showLvSelect = false; sfxClick(); return; }
-      if (x >= ox + totalW - 10 && x <= ox + totalW + 10 && y >= oy + 8 && y <= oy + 36) { showLvSelect = false; sfxClick(); return; }
+      if (x >= px + pw - 24 && x <= px + pw && y >= py + 4 && y <= py + 28) { showLvSelect = false; sfxClick(); return; }
       const prog = parseInt(localStorage.getItem('bombProgress'));
       const maxLv = isNaN(prog) ? 0 : prog + 1;
       for (let i = 0; i < TOTAL_LV; i++) {
         const col = i % cols, row = Math.floor(i / cols);
-        const bx = ox + col * (cw + gap), by = oy + 64 + row * (ch + gap);
+        const bx = ox + col * (cw + gap), by = oy + headerH + row * (ch + gap);
         if (x >= bx && x <= bx + cw && y >= by && y <= by + ch && i <= maxLv) {
           sfxClick(); showLvSelect = false; localStorage.setItem('bombPickLv', i); startGame(); return;
         }
       }
-      const infBx = ox + 10, infBy = oy + 64 + ch * 2 + gap + 16, infBw = totalW - 20, infBh = 42;
-      if (x >= infBx && x <= infBx + infBw && y >= infBy && y <= infBy + infBh) {
+      const infBx = ox, infBy = oy + headerH + gridH + 8, infBw = totalW;
+      if (x >= infBx && x <= infBx + infBw && y >= infBy && y <= infBy + infH) {
         sfxClick(); showLvSelect = false; startGame(true); return;
       }
       return;
@@ -1696,15 +1724,19 @@ function hMove(x, y) {
     lvBtnHov = ir(x, y, LB);
     lvHov = -1;
     if (showLvSelect) {
-      const cols = 2, gap = 20, cw = 170, ch = 95;
+      const cols = 3, gap = 8, cw = 108, ch = 56;
+      const rows = Math.ceil(TOTAL_LV / cols);
       const totalW = cols * cw + (cols - 1) * gap;
-      const ox = W / 2 - totalW / 2, oy = 200;
+      const ox = Math.max(10, (W - totalW) / 2);
+      const headerH = 52;
+      const gridH = rows * ch + (rows - 1) * gap;
+      const oy = Math.max(16, (H - (headerH + 4 + gridH + 8 + 34 + 12)) / 2);
       for (let i = 0; i < TOTAL_LV; i++) {
         const col = i % cols, row = Math.floor(i / cols);
-        const bx = ox + col * (cw + gap), by = oy + 64 + row * (ch + gap);
+        const bx = ox + col * (cw + gap), by = oy + headerH + row * (ch + gap);
         if (x >= bx && x <= bx + cw && y >= by && y <= by + ch) { lvHov = i; break; }
       }
-      const infBx = ox + 10, infBy = oy + 64 + ch * 2 + gap + 16, infBw = totalW - 20, infBh = 42;
+      const infBx = ox, infBy = oy + headerH + gridH + 8, infBw = totalW, infBh = 34;
       if (x >= infBx && x <= infBx + infBw && y >= infBy && y <= infBy + infBh) lvHov = -2;
     }
     canvas.style.cursor = (btnHov || lvBtnHov || lvHov >= 0) ? 'pointer' : 'default';
